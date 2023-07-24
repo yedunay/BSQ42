@@ -24,6 +24,9 @@ void set_objects() {
     matrix[5][2] = 'O';
     matrix[8][7] = 'O';
     matrix[6][14] = 'O';
+    matrix[2][5] = 'O';
+    matrix[3][1] = 'O';
+    matrix[12][12] = 'O';
 }
 
 void print_matrix() {
@@ -189,7 +192,11 @@ int main() {
     print_matrix();
     printf("\n\n\n");
     put_numbers();
+    print_matrix();
+    printf("\n\n\n");
     draw_square();
+    print_matrix();
+    printf("\n\n\n");
     remove_numbers();
     print_matrix();
 }
