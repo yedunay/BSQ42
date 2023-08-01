@@ -1,202 +1,418 @@
-#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-#define SIZE 20
-char matrix[SIZE][SIZE];
-int center[2];
+typedef struct s_map_info 
+{
+    int row;
+    int col;
+    char empty;
+    char obstacle;
+    char full;
+    int **matrix;
+} 
+t_map_info;
 
-void initialize_matrix() {
-    int y = 0;
-    int x = 0;
+#pragma region [INITIALIZE MAP]
 
-    while (y < SIZE) {
-        x = 0;
-        while (x < SIZE) {
-            matrix[y][x] = '-';
-            x++;
-        }
-        y++;
-    }
-}
+int set_map_size(int input_fd, t_map_info *map) 
+{
+    char ch;
+    int col;
 
-void set_objects() {
-    matrix[1][5] = 'O';
-    matrix[2][1] = 'O';
-    matrix[5][2] = 'O';
-    matrix[8][7] = 'O';
-    matrix[6][14] = 'O';
-    matrix[2][5] = 'O';
-    matrix[3][1] = 'O';
-    matrix[12][12] = 'O';
-}
-
-void print_matrix() {
-    int i = 0;
-    int j = 0;
-
-    while (i < SIZE) {
-        j = 0;
-        while (j < SIZE) {
-            if (matrix[i][j] == 'O')
-                printf("\033[33m%c\033[0m", matrix[i][j]);
-            else if(matrix[i][j] == 'x')
-                printf("\033[31m%c\033[0m", matrix[i][j]);
-            else
-                printf("%c", matrix[i][j]);
-            j++;
-        }
-        printf("\n");
-        i++;
-    }
-}
-
-void put_corner() {
-    int i, j;
-
-    for (i = 0; i < SIZE; i++) {
-        for (j = 0; j < SIZE; j++) {
-            if ((i == 0 || j == 0 || i == SIZE - 1 || j == SIZE - 1) && matrix[i][j] != 'O') {
-                matrix[i][j] = 1 + '0';
-            }
-        }
-    }
-}
-
-int look_around_for(int a, int b, char c) {
-    int i = a - 1;
-    int j = b - 1;
-    while (i <= a + 1) {
-        j = b - 1;
-        while (j <= b + 1) {
-            if (!(i == a && j == b) && matrix[i][j] == c)
-                return 1;
-            j++;
-        }
-        i++;
-    }
-    return 0;
-}
-
-void put_objects_around() {
-    int i, j;
-
-    for (i = 1; i < SIZE; i++) {
-        for (j = 1; j < SIZE; j++) {
-            if (matrix[i][j] == '-' && look_around_for(i, j, 'O') == 1) {
-                matrix[i][j] = 1 + '0';
-            }
-        }
-    }
-}
-
-int check_empty_cell() {
-    int i, j;
-
-    for (i = 1; i < SIZE; i++) {
-        for (j = 1; j < SIZE; j++) {
-            if (matrix[i][j] == '-') {
-                return 1;
-            }
-        }
-    }
-    return 0;
-}
-
-void put_numbers() {
-    int k = 2;
-    int i, j;
-
-    put_corner();
-    put_objects_around();
-    while (check_empty_cell() == 1) {
-        for (i = 1; i < SIZE; i++) {
-            for (j = 1; j < SIZE; j++) {
-                if (matrix[i][j] == '-' && look_around_for(i, j, k - 1 + '0') == 1) {
-                    matrix[i][j] = k + '0';
-                }
-            }
-        }
-        k++;
-    }
-}
-
-int find_max_number() {
-    int i, j;
-    int current = 0;
-
-    for (i = 1; i < SIZE; i++) {
-        for (j = 1; j < SIZE; j++) {
-            if (matrix[i][j] > current && matrix[i][j] != 'O') {
-                current = matrix[i][j];
-            }
-        }
-    }
-    return current - '0';
-}
-
-int look_for_four(int max) {
-    int i, j;
-    
-    for (i = 1; i < SIZE; i++) {
-        for (j = 1; j < SIZE; j++) {
-            if (matrix[i][j] == max + '0' && matrix[i + 1][j] == max + '0' &&
-                matrix[i][j + 1] == max + '0' && matrix[i + 1][j + 1] == max + '0') 
+    map->col = 0;
+    col = 0;
+    while (read(input_fd, &ch, sizeof(ch)) == sizeof(ch)) 
+    {
+        if (ch == '\n') 
+        {
+            if (col > map->col) 
             {
-                center[0] = i;
-                center[1] = j;
-                return 1;
+                map->col = col;
             }
+            col = 0;
+        } else {
+            col++;
         }
     }
-    return 0;
+    if(map->col == 0)
+    {
+        write(1, "Map Error!\n", 11);
+        return 0;
+    }
+    return 1;
 }
 
-void draw_square() {
-    int max_number = find_max_number();
-
-    int square_minus_x = max_number - 1;
-    int square_plus_x = max_number - 1;
-    int square_minus_y = max_number - 1;
-    int square_plus_y = max_number - 1;
-
-    if (look_for_four(max_number) == 1) {
-        square_plus_x++;
-        square_minus_y++;
+int set_matrix_element(t_map_info *map, char ch, int row, int col) 
+{
+    if (ch == map->empty)
+        map->matrix[row][col] = -1;
+    else if (ch == map->obstacle)
+        map->matrix[row][col] = -2;
+    else {
+        write(1, "Map Error!\n", 11);
+        return 0;
     }
+    return 1;
+}
+
+void set_map_info(int input_fd, t_map_info *map)
+{
+    char ch;
+    char str[64];
+    int i = 0;
+
+    while (read(input_fd, &ch, sizeof(ch))) 
+    {
+        if (ch == '\n') 
+        {
+            break;
+        }
+        else
+        {
+            str[i] = ch;
+            i++;
+        }
+    }
+    map->empty = str[i - 3];
+    map->obstacle = str[i - 2];
+    map->full = str[i - 1];
+    map->row = atoi(str);
+}
+
+int set_map_matrix(int input_fd, t_map_info *map)
+{
+    int row;
+    int col;
+    char ch;
+
+    row = 0;
+    col = 0;
+    set_map_info(input_fd, map);
+    map->matrix = (int **)malloc(map->row * sizeof(int *));
     
-    int i = center[0] - square_plus_y;
-    int j = center[1] - square_minus_x;
-    while(i <= center[0] + square_minus_y) {
-        j = center[1] - square_minus_x;
-        while(j <= center[1] + square_plus_x) {
-            matrix[i][j] = 'x';
+    while(row < map->row)
+    {
+        map->matrix[row] = (int *)malloc(map->col * sizeof(int));
+        col = 0;
+        while(col < map->col)
+        {
+            read(input_fd, &ch, sizeof(ch));
+            if(!set_matrix_element(map, ch, row, col))
+                return 0;
+            col++;
+        }
+        read(input_fd, &ch, sizeof(ch));
+        row++;
+    }
+    return 1;
+}
+
+int initialize_map(t_map_info *map, char *file_name)
+{
+    int input_fd;
+
+    input_fd = open(file_name, 0x0000);
+    if (input_fd == -1) 
+    {
+        write(2, "Open Error\n", 13);
+        return 0;
+    }
+    set_map_info(input_fd ,map);
+    if(!set_map_size(input_fd ,map))
+        return 0;
+    close(input_fd);
+    input_fd = open(file_name, 0x0000);
+    if (input_fd == -1) 
+    {
+        write(2, "Open Error\n", 13);
+        return 0;
+    }
+    if(!set_map_matrix(input_fd, map))
+        return 0;
+    return 1;
+}
+
+#pragma endregion
+
+#pragma region [READ MAP]
+
+int look_around(t_map_info *map, int row, int col, int nbr)
+{
+    int i;
+    int j;
+
+    i = row - 1;
+    while (i <= row + 1)
+    {
+        j = col - 1;
+        while (j <= col + 1)
+        {
+            if (i >= 0 && i < map->row && j >= 0 && j < map->col)
+                if(!(i == row && j == col) && map->matrix[i][j] == nbr)
+                    return 1;
             j++;
         }
         i++;
     }
+    return 0;
 }
 
-void remove_numbers(){
-    int i, j;
-    
-    for (i = 0; i < SIZE; i++) {
-        for (j = 0; j < SIZE; j++) {
-            if(matrix[i][j] != 'O' && matrix[i][j] != 'x')
-                matrix[i][j] = '-';
+void put_corner(t_map_info *map)
+{
+    int row;
+    int col;
+
+    row = 0;
+    while (row < map->row)
+    {
+        col = 0;
+        while (col < map->col)
+        {
+            if((row == 0 || col == 0 || row == map->row - 1 || col == map->col - 1) && map->matrix[row][col] == -1)
+                map->matrix[row][col] = 1;
+            col++;
         }
+        row++;
     }
 }
 
-int main() {
-    initialize_matrix();
-    set_objects();
-    print_matrix();
-    printf("\n\n\n");
-    put_numbers();
-    print_matrix();
-    printf("\n\n\n");
-    draw_square();
-    print_matrix();
-    printf("\n\n\n");
-    remove_numbers();
-    print_matrix();
+void put_obstacle_around(t_map_info *map)
+{
+    int row;
+    int col;
+
+    row = 1;
+    while (row < map->row)
+    {
+        col = 1;
+        while (col < map->col)
+        {
+            if(look_around(map, row, col, -2) && map->matrix[row][col] == -1)
+                map->matrix[row][col] = 1;
+            col++;
+        }
+        row++;
+    }
 }
+
+int check_empty_cell(t_map_info *map)
+{   
+    int row;
+    int col;
+
+    row = 1;
+    while (row < map->row)
+    {
+        col = 1;
+        while (col < map->col)
+        {
+            if(map->matrix[row][col] == -1)
+                return 1;
+            col++;
+        }
+        row++;
+    }
+    return 0;
+}
+
+void put_numbers(t_map_info *map)
+{
+    int row;
+    int col;
+    int nbr;
+
+    nbr = 2;
+    put_corner(map);
+    put_obstacle_around(map);
+    while (check_empty_cell(map))
+    {
+        row = 1;
+        while (row < map->row - 1)
+        {
+            col = 1;
+            while (col < map->col - 1)
+            {
+                if (map->matrix[row][col] == -1 && look_around(map, row, col, nbr - 1) == 1) 
+                    map->matrix[row][col] = nbr;
+                col++;
+            }
+            row++;
+        }
+        nbr++;
+    }
+}
+
+#pragma endregion
+
+#pragma region [DRAW SQUARE]
+
+int ft_find_max(t_map_info *map, int *center)
+{
+    int row;
+    int col;
+    int current;
+
+    current = 0;
+    row = 1;
+    while (row < map->row)
+    {
+        col = 1;
+        while (col < map->col)
+        {
+            if(map->matrix[row][col] > current)
+            {
+                current = map->matrix[row][col];
+                center[0] = row;
+                center[1] = col;
+            }
+            col++;
+        }
+        row++;
+    }
+    return current;
+}
+
+int odd_or_even(t_map_info *map, int *center, int max)
+{
+    int row;
+    int col;
+
+    row = 0;
+    while (row < map->row)
+    {
+        col = 0;
+        while (col < map->col)
+        {
+            if(map->matrix[row][col] == max && map->matrix[row + 1][col] == max &&
+                map->matrix[row][col + 1] == max && map->matrix[row + 1][col + 1] == max)
+            {
+                center[0] = row;
+                center[1] = col;
+                return 1;
+            }
+            col++;
+        } 
+        row++;
+    }
+    return 0;
+}
+
+void draw_square(t_map_info *map)
+{
+    int row;
+    int col;
+    int center[2];
+    int max_nbr;
+    int start;
+    int end;
+
+    max_nbr = ft_find_max(map, center);
+    start = max_nbr - 1;
+    end = max_nbr - 1;
+    if(odd_or_even(map, center, max_nbr))
+        end++;
+    row = center[0] - start;
+    while(row <= center[0] + end) {
+        col = center[1] - start;
+        while(col <= center[1] + end) {
+            map->matrix[row][col] = -3;
+            col++;
+        }
+        row++;
+    }
+}
+
+#pragma endregion
+
+#pragma region [MAIN]
+
+void put_map_char(t_map_info *map ,int c)
+{
+    if(c == -1)
+        write(1, &map->empty, 1);
+    else if(c == -2)
+        write(1, &map->obstacle, 1);
+    else if(c == -3)
+        write(1, &map->full, 1);
+    else
+    {
+        char a = c + '0';
+        write(1, &a, 1);
+    }
+}
+
+void print_map(t_map_info *map)
+{
+    int row;
+    int col;
+
+    row = 0;
+    while (row < map->row){
+        col = 0;
+        while (col < map->col){
+            put_map_char(map, map->matrix[row][col]);
+            col++;
+        }
+        row++;
+        write(1, "\n", 1);
+    }
+}
+
+void remove_numbers(t_map_info *map)
+{
+    int row;
+    int col;
+    
+    row = 0;
+    while (row < map->row)
+    {
+        col = 0;
+        while (col < map->col)
+        {
+            if(map->matrix[row][col] > 0)
+                map->matrix[row][col] = -1;
+            col++;
+        }
+        row++;
+    }
+}
+
+int handle_map(t_map_info *map)
+{
+    (void)map;
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    int i;
+    t_map_info map;
+
+    i = 1;
+    if(argc == 1)
+    {
+        if(handle_map(&map))
+        {
+            put_numbers(&map);
+            draw_square(&map);
+            remove_numbers(&map);
+            print_map(&map);
+        }
+    }
+    while (i < argc)
+    {
+        if(initialize_map(&map, argv[i]))
+        {
+            put_numbers(&map);
+            draw_square(&map);
+            remove_numbers(&map);
+            print_map(&map);
+        }
+        i++;
+        if(i < argc)
+            write(1,"\n",1);
+    }
+}
+
+#pragma endregion

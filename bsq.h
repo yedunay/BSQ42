@@ -14,5 +14,4 @@ void	    ft_putnbr(int nb);
 char		*ft_strcpy(char *dest, char *src);
 int		    ft_strlen(char *str);
 
-
 #endif
