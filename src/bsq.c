@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:08 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/02 20:19:25 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 21:29:29 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,12 @@
 
 void	put_map_char(t_map_info *map, int c)
 {
-	char	a;
-
-	a = c + '0';
 	if (c == -1)
 		write(1, &map->empty, 1);
 	else if (c == -2)
 		write(1, &map->obstacle, 1);
 	else if (c == -3)
 		write(1, &map->full, 1);
-	else
-		write(1, &a, 1);
 }
 
 void	print_map(t_map_info *map)

@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:30 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/02 20:25:39 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 21:37:33 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,12 +97,12 @@ void	read_stdin(void)
 	int		fd;
 
 	fd = open("stdin", O_RDWR | O_CREAT | O_TRUNC, 0644);
-	buf = (char *)malloc(51 * sizeof(char));
-	size = read(0, buf, 50);
+	buf = (char *)malloc(sizeof(char));
+	size = read(0, buf, 1);
 	while (size > 0)
 	{
 		write(fd, buf, size);
-		size = read(0, buf, 50);
+		size = read(0, buf, 1);
 	}
 	close(fd);
 	free(buf);
