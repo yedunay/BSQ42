@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:08 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/01 20:16:09 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 14:59:04 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,11 @@ void	remove_numbers(t_map_info *map)
 	}
 }
 
+void	handle_map(t_map_info *map)
+{
+		
+}
+
 int	main(int argc, char **argv)
 {
 	int			i;
@@ -86,4 +91,6 @@ int	main(int argc, char **argv)
 		if (i < argc)
 			write(1, "\n", 1);
 	}
+	if (argc == 0)
+		handle_map(&map);
 }

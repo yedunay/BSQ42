@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:10 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/01 20:16:11 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 14:51:50 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,13 +16,16 @@ int	set_map_size(int input_fd, t_map_info *map)
 {
 	char	ch;
 	int		col;
+	int		row;
 
 	map->col = 0;
 	col = 0;
+	row = 0;
 	while (read(input_fd, &ch, sizeof(ch)) == sizeof(ch))
 	{
 		if (ch == '\n')
 		{
+			row++;
 			if (col > map->col)
 				map->col = col;
 			col = 0;
@@ -30,7 +33,7 @@ int	set_map_size(int input_fd, t_map_info *map)
 		else
 			col++;
 	}
-	if (map->col == 0)
+	if (map->col == 0 || map->row == 0 || row != map->row)
 	{
 		write(1, "Map Error!\n", 11);
 		return (0);
@@ -49,6 +52,17 @@ int	set_matrix_element(t_map_info *map, char ch, int row, int col)
 		write(1, "Map Error!\n", 11);
 		return (0);
 	}
+	if (!(map->empty != map->full && map->empty != map->obstacle))
+	{
+		if (!(map->obstacle != map->full))
+		{
+			if (!(map->empty > 31 && map->obstacle > 31 && map->full > 31))
+			{
+				write(1, "Map Error!\n", 11);
+				return (0);
+			}
+		}
+	}
 	return (1);
 }
 
@@ -62,19 +76,17 @@ void	set_map_info(int input_fd, t_map_info *map)
 	while (read(input_fd, &ch, sizeof(ch)))
 	{
 		if (ch == '\n')
-		{
 			break ;
-		}
 		else
-		{
-			str[i] = ch;
-			i++;
-		}
+			str[i++] = ch;
 	}
-	map->empty = str[i - 3];
-	map->obstacle = str[i - 2];
-	map->full = str[i - 1];
-	map->row = atoi(str);
+	i = -1;
+	map->row = 0;
+	while (str[i] <= '9' && str[++i] >= '0')
+		map->row = (str[i] - '0') + (map->row * 10);
+	map->empty = str[i];
+	map->obstacle = str[i + 1];
+	map->full = str[i + 2];
 }
 
 int	set_map_matrix(int input_fd, t_map_info *map)
