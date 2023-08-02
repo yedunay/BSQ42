@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:08 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/02 14:59:04 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 16:23:50 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,15 @@ void	remove_numbers(t_map_info *map)
 	}
 }
 
-void	handle_map(t_map_info *map)
+void	render_map(t_map_info *map, char *file_name)
 {
-		
+	if (initialize_map(map, file_name))
+		{
+			put_numbers(map);
+			draw_square(map);
+			remove_numbers(map);
+			print_map(map);
+		}
 }
 
 int	main(int argc, char **argv)
@@ -78,19 +84,17 @@ int	main(int argc, char **argv)
 	t_map_info	map;
 
 	i = 1;
-	while (i < argc)
-	{
-		if (initialize_map(&map, argv[i]))
+	if(argc > 1)
+		while (i < argc)
 		{
-			put_numbers(&map);
-			draw_square(&map);
-			remove_numbers(&map);
-			print_map(&map);
+			render_map(&map, argv[i]);
+			i++;
+			if (i < argc)
+				write(1, "\n", 1);
 		}
-		i++;
-		if (i < argc)
-			write(1, "\n", 1);
+	else
+	{
+		read_stdin();
+		render_map(&map, "stdin");
 	}
-	if (argc == 0)
-		handle_map(&map);
 }

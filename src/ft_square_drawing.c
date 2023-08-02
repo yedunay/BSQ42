@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:30 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/02 12:36:30 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 16:23:57 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,4 +87,20 @@ void	draw_square(t_map_info *map)
 		}
 		row++;
 	}
+}
+
+void 	read_stdin()
+{
+		int		ret;
+	char	*buf;
+	int		fd;
+
+	fd = open("stdin", O_RDWR | O_CREAT, 0644);
+	buf = (char*)malloc(51 * sizeof(char));
+	while ((ret = read(0, buf, 50)) > 0)
+	{
+		write(fd, buf, ret);
+	}
+	close(fd);
+	free(buf);
 }
