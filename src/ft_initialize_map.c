@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:10 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/02 14:51:50 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 19:07:19 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,16 +52,10 @@ int	set_matrix_element(t_map_info *map, char ch, int row, int col)
 		write(1, "Map Error!\n", 11);
 		return (0);
 	}
-	if (!(map->empty != map->full && map->empty != map->obstacle))
+	if (!(map->empty != map->full && map->empty != map->obstacle && map->obstacle != map->full && map->empty > 31 && map->obstacle > 31 && map->full > 31))
 	{
-		if (!(map->obstacle != map->full))
-		{
-			if (!(map->empty > 31 && map->obstacle > 31 && map->full > 31))
-			{
-				write(1, "Map Error!\n", 11);
-				return (0);
-			}
-		}
+		write(1, "Map Error!\n", 11);
+		return (0);
 	}
 	return (1);
 }

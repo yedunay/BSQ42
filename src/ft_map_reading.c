@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:15 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/01 20:16:16 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 19:02:05 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,9 @@ void	put_corner(t_map_info *map)
 		col = 0;
 		while (col < map->col)
 		{
-			if ((row == 0 || col == 0 || row == map->row - 1 || col == map->col
-					- 1) && map->matrix[row][col] == -1)
-				map->matrix[row][col] = 1;
+			if(map->matrix[row][col] == -1)
+				if ((row == 0 || col == 0 || row == map->row - 1 || col == map->col- 1))
+					map->matrix[row][col] = 1;
 			col++;
 		}
 		row++;
@@ -64,8 +64,9 @@ void	put_obstacle_around(t_map_info *map)
 		col = 1;
 		while (col < map->col)
 		{
-			if (look_around(map, row, col, -2) && map->matrix[row][col] == -1)
-				map->matrix[row][col] = 1;
+			if (map->matrix[row][col] == -1)
+				if(look_around(map, row, col, -2))
+					map->matrix[row][col] = 1;
 			col++;
 		}
 		row++;
@@ -109,9 +110,9 @@ void	put_numbers(t_map_info *map)
 			col = 1;
 			while (col < map->col - 1)
 			{
-				if (map->matrix[row][col] == -1 && look_around(map, row, col,
-						nbr - 1) == 1)
-					map->matrix[row][col] = nbr;
+				if (map->matrix[row][col] == -1)
+					if(look_around(map, row, col,nbr - 1) == 1)
+						map->matrix[row][col] = nbr;
 				col++;
 			}
 			row++;

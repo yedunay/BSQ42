@@ -13,18 +13,18 @@ INC = ./headers/
 all : $(NAME) 
 
 $(NAME): $(DOTO)
-	gcc $(FLAG) -o $(NAME) $(DOTO) 
+	gcc $(CFLAGS) -o $(NAME) $(DOTO) 
 
 outputs/%.o: src/%.c
 	$(CC) $(CFLAGS) -o $@ $< -I $(INC)
 
 clean : 
-	/bin/rm -f *.o 
+	/bin/rm -rf */*.o 
 
 fclean : clean 
 	/bin/rm -f $(NAME)
 
-re : fclean all 
+re : fclean all
 
 # NAME = bsq: Oluşturulacak programın adını "bsq" olarak belirler.
 # CC = gcc -c: C dosyalarını derlemek için kullanılacak derleyiciyi belirtir. Burada "gcc -c" kullanılarak sadece nesne dosyaları oluşturulur (derlenir), yürütülebilir dosya oluşturulmaz.
