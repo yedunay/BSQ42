@@ -44,8 +44,9 @@ void	put_corner(t_map_info *map)
 		col = 0;
 		while (col < map->col)
 		{
-			if(map->matrix[row][col] == -1)
-				if ((row == 0 || col == 0 || row == map->row - 1 || col == map->col- 1))
+			if (map->matrix[row][col] == -1)
+				if ((row == 0 || col == 0 || row == map->row - 1
+						|| col == map->col - 1))
 					map->matrix[row][col] = 1;
 			col++;
 		}
@@ -65,7 +66,7 @@ void	put_obstacle_around(t_map_info *map)
 		while (col < map->col)
 		{
 			if (map->matrix[row][col] == -1)
-				if(look_around(map, row, col, -2))
+				if (look_around(map, row, col, -2))
 					map->matrix[row][col] = 1;
 			col++;
 		}
@@ -111,7 +112,7 @@ void	put_numbers(t_map_info *map)
 			while (col < map->col - 1)
 			{
 				if (map->matrix[row][col] == -1)
-					if(look_around(map, row, col,nbr - 1) == 1)
+					if (look_around(map, row, col, nbr - 1) == 1)
 						map->matrix[row][col] = nbr;
 				col++;
 			}

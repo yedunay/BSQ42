@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:30 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/02 19:02:38 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 20:25:39 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ int	ft_find_max(t_map_info *map, int *center)
 	int	current;
 
 	current = 0;
-	row = 1;
+	row = 0;
 	while (row < map->row)
 	{
-		col = 1;
+		col = 0;
 		while (col < map->col)
 		{
 			if (map->matrix[row][col] > current)
@@ -44,13 +44,16 @@ int	odd_or_even(t_map_info *map, int *center, int max)
 	int	col;
 
 	row = 0;
-	while (row < map->row)
+	while (row < map->row - 1)
 	{
 		col = 0;
-		while (col < map->col)
+		while (col < map->col - 1)
 		{
-			if (map->matrix[row][col] == max && map->matrix[row + 1][col] == max && map->matrix[row][col + 1] == max && map->matrix[row + 1][col+ 1] == max)
+			if (map->matrix[row][col] == max && map->matrix[row + 1][col] == max
+				&& map->matrix[row][col + 1] == max && map->matrix[row + 1][col
+				+ 1] == max)
 			{
+				write(1, "a", 1);
 				center[0] = row;
 				center[1] = col;
 				return (1);
@@ -87,17 +90,19 @@ void	draw_square(t_map_info *map)
 	}
 }
 
-void 	read_stdin()
+void	read_stdin(void)
 {
-		int		ret;
+	int		size;
 	char	*buf;
 	int		fd;
 
-	fd = open("stdin", O_RDWR | O_CREAT | O_TRUNC , 0644);
-	buf = (char*)malloc(51 * sizeof(char));
-	while ((ret = read(0, buf, 50)) > 0)
+	fd = open("stdin", O_RDWR | O_CREAT | O_TRUNC, 0644);
+	buf = (char *)malloc(51 * sizeof(char));
+	size = read(0, buf, 50);
+	while (size > 0)
 	{
-		write(fd, buf, ret);
+		write(fd, buf, size);
+		size = read(0, buf, 50);
 	}
 	close(fd);
 	free(buf);

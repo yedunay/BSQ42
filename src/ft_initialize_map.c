@@ -6,7 +6,7 @@
 /*   By: ivar <ivar@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/01 20:16:10 by ivar              #+#    #+#             */
-/*   Updated: 2023/08/02 19:07:19 by ivar             ###   ########.fr       */
+/*   Updated: 2023/08/02 20:53:30 by ivar             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ int	set_map_size(int input_fd, t_map_info *map)
 	}
 	if (map->col == 0 || map->row == 0 || row != map->row)
 	{
-		write(1, "Map Error!\n", 11);
+		write(1, "map error\n", 11);
 		return (0);
 	}
 	return (1);
@@ -49,12 +49,14 @@ int	set_matrix_element(t_map_info *map, char ch, int row, int col)
 		map->matrix[row][col] = -2;
 	else
 	{
-		write(1, "Map Error!\n", 11);
+		write(1, "map error\n", 11);
 		return (0);
 	}
-	if (!(map->empty != map->full && map->empty != map->obstacle && map->obstacle != map->full && map->empty > 31 && map->obstacle > 31 && map->full > 31))
+	if (!(map->empty != map->full && map->empty != map->obstacle
+			&& map->obstacle != map->full && map->empty > 31
+			&& map->obstacle > 31 && map->full > 31))
 	{
-		write(1, "Map Error!\n", 11);
+		write(1, "map error\n", 11);
 		return (0);
 	}
 	return (1);
@@ -117,7 +119,7 @@ int	initialize_map(t_map_info *map, char *file_name)
 	input_fd = open(file_name, 0x0000);
 	if (input_fd == -1)
 	{
-		write(2, "Open Error\n", 13);
+		write(2, "map error\n", 13);
 		return (0);
 	}
 	set_map_info(input_fd, map);
@@ -127,7 +129,7 @@ int	initialize_map(t_map_info *map, char *file_name)
 	input_fd = open(file_name, 0x0000);
 	if (input_fd == -1)
 	{
-		write(2, "Open Error\n", 13);
+		write(2, "map error\n", 13);
 		return (0);
 	}
 	if (!set_map_matrix(input_fd, map))
