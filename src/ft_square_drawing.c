@@ -53,7 +53,6 @@ int	odd_or_even(t_map_info *map, int *center, int max)
 				&& map->matrix[row][col + 1] == max && map->matrix[row + 1][col
 				+ 1] == max)
 			{
-				write(1, "a", 1);
 				center[0] = row;
 				center[1] = col;
 				return (1);
